@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VibeVision — Ultimate Interactive Eyewear</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+            background: linear-gradient(135deg, #0a0a0a 0%, #1a0033 25%, #0a0a2a 50%, #1a0033 75%, #0a0a0a 100%);
+            background-size: 400% 400%;
+            animation: bgShift 10s ease infinite;
+            color: #ffffff;
+            overflow-x: hidden;
+        }
+
+        @keyframes bgShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        @keyframes pulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+        @keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+        @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(50px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes confettiFall { 0% { transform: translateY(-100vh) rotate(0deg); } 100% { transform: translateY(100vh) rotate(360deg); } }
+
+        .animate-pulse { animation: pulse 1s infinite; }
+        .animate-bounce { animation: bounce 2s ease infinite; }
+        .animate-float { animation: float 3s ease infinite; }
+
+        nav {
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(15px);
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1000;
+            border-bottom: 2px solid cyan;
+            padding: 16px 40px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: 800;
+            background: linear-gradient(135deg, cyan, magenta, cyan);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: pulse 1s infinite;
+            cursor: pointer;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            font-size: 14px;
+            cursor: pointer;
+            padding: 8px 16px;
+            border-radius: 40px;
+            transition: 0.3s;
+            outline: none;
+        }
+
+        .nav-links a:hover, .nav-links a:focus {
+            background: rgba(0,255,255,0.2);
+            color: cyan;
+        }
+
+        .section {
+            min-height: 100vh;
+            padding: 140px 40px 60px; 
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+            animation: slideUp 0.6s ease;
+        }
+
+        /* Cart Styles */
+        .cart-panel {
+            position: fixed;
+            right: -450px;
+            top: 0;
+            width: 400px;
+            height: 100vh;
+            background: #0a0a0a;
+            border-left: 3px solid cyan;
+            z-index: 1001;
+            padding: 80px 24px 24px;
+            transition: right 0.3s ease;
+            overflow-y: auto;
+        }
+
+        .cart-panel.open { right: 0; }
+
+        .cart-close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 35px;
+            cursor: pointer;
+            color: cyan;
+        }
+
+        .cart-close:hover { transform: rotate(90deg); color: magenta; }
+
+        /* Product Grid */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 40px;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .product-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border-radius: 30px;
+            padding: 25px;
+            cursor: pointer;
+            border: 1px solid rgba(0,255,255,0.3);
+            transition: 0.3s;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .product-card:hover {
+            transform: translateY(-10px);
+            border-color: cyan;
+            box-shadow: 0 20px 40px rgba(0,255,255,0.2);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 180px;
+            background: linear-gradient(135deg, #1a0033, #0a0a2a);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 70px;
+        }
+
+        /* Team Section Grid */
+        .team-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 20px;
+            margin: 40px 0;
+        }
+
+        .team-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px 20px;
+            transition: 0.3s;
+            text-align: center;
+        }
+
+        .team-card:hover {
+            transform: translateY(-5px);
+            border-color: magenta;
+            box-shadow: 0 10px 20px rgba(255,0,255,0.2);
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, cyan, magenta);
+            padding: 12px 24px;
+            border: none;
+            border-radius: 40px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-top: auto;
+        }
+
+        .btn:hover { transform: scale(1.05); }
+
+        input, textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 20px;
+            border: none;
+            background: rgba(255,255,255,0.9);
+            font-family: inherit;
+        }
+
+        /* Modal & Toasts */
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            backdrop-filter: blur(5px);
+            z-index: 2000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .modal-overlay.active { display: flex; opacity: 1; }
+        .modal-content {
+            background: #1a0033;
+            padding: 40px;
+            border-radius: 30px;
+            border: 1px solid cyan;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            position: relative;
+            transform: translateY(20px);
+            transition: transform 0.3s;
+        }
+        .modal-overlay.active .modal-content { transform: translateY(0); }
+        .modal-close {
+            position: absolute; top: 15px; right: 20px;
+            font-size: 24px; color: cyan; cursor: pointer;
+        }
+
+        .toast-container {
+            position: fixed; bottom: 20px; right: 20px; z-index: 3000;
+            display: flex; flex-direction: column; gap: 10px;
+        }
+        .toast {
+            background: linear-gradient(135deg, cyan, magenta);
+            color: white; padding: 15px 25px; border-radius: 10px;
+            font-weight: bold; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+            animation: slideUp 0.3s ease forwards;
+        }
+
+        @media (max-width: 768px) {
+            nav { padding: 10px 20px; justify-content: center; }
+            .cart-panel { width: 100%; right: -100%; }
+            .nav-links a { font-size: 12px; padding: 6px 12px; }
+            .section { padding-top: 180px; }
+        }
+    </style>
+</head>
+<body>
+
+<nav>
+    <div class="logo" onclick="showSection('home')" tabindex="0" onkeypress="handleKeyPress(event, 'home')">⚡ VIBEVISION</div>
+    <div class="nav-links">
+        <a tabindex="0" onclick="showSection('home')" onkeypress="handleKeyPress(event, 'home')">🏠 Home</a>
+        <a tabindex="0" onclick="showSection('shop')" onkeypress="handleKeyPress(event, 'shop')">🛍️ Shop</a>
+        <a tabindex="0" onclick="showSection('new')" onkeypress="handleKeyPress(event, 'new')">✨ New</a>
+        <a tabindex="0" onclick="showSection('bestsellers')" onkeypress="handleKeyPress(event, 'bestsellers')">⭐ Bestsellers</a>
+        <a tabindex="0" onclick="showSection('sizeguide')" onkeypress="handleKeyPress(event, 'sizeguide')">📏 Size Guide</a>
+        <a tabindex="0" onclick="showSection('about')" onkeypress="handleKeyPress(event, 'about')">📖 About</a>
+        <a tabindex="0" onclick="showSection('contact')" onkeypress="handleKeyPress(event, 'contact')">📞 Contact</a>
+        <a tabindex="0" onclick="toggleCart()" onkeypress="if(event.key==='Enter') toggleCart()" style="background:rgba(0,255,255,0.2);">🛒 <span id="cartCount">0</span></a>
+    </div>
+</nav>
+
+<div class="cart-panel" id="cartPanel">
+    <div class="cart-close" onclick="toggleCart()">✖</div>
+    <h3 style="color:cyan; margin-bottom:24px;">🛍️ Your Cart</h3>
+    <div id="cartItems"></div>
+    <div style="font-size:28px; font-weight:800; margin:20px 0;">Total: ₹<span id="cartTotal">0</span></div>
+    <button class="btn" style="width:100%;" onclick="checkout()">✅ Checkout</button>
+</div>
+
+<!-- Custom Modal -->
+<div class="modal-overlay" id="productModal" onclick="closeModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <div class="modal-close" onclick="closeModal(event, true)">✖</div>
+        <div id="modalImage" style="font-size: 60px; margin-bottom: 20px;"></div>
+        <h2 id="modalTitle" style="margin-bottom: 10px;"></h2>
+        <div id="modalPrice" style="color: cyan; font-size: 24px; font-weight: bold; margin-bottom: 20px;"></div>
+        <p id="modalSpecs" style="color: #ccc; margin-bottom: 25px; line-height: 1.5;"></p>
+        <button class="btn" id="modalAddBtn" style="width:100%;">🛒 Add to Cart</button>
+    </div>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- HOME -->
+<section id="home" class="section active">
+    <div style="text-align:center; padding: 40px 20px;">
+        <h1 class="animate-bounce" style="font-size: clamp(40px, 6vw, 72px); background:linear-gradient(135deg,cyan,magenta); -webkit-background-clip:text; background-clip:text; color:transparent;">See the Future.<br>Feel the Vibe.</h1>
+        <p class="animate-float" style="font-size: clamp(20px, 3vw, 28px); margin: 30px 0;">Premium eyewear starting at ₹2,499</p>
+        <button class="btn animate-pulse" onclick="showSection('shop')">🚀 Explore Collection</button>
+        <div style="margin-top: 80px; display: flex; justify-content: center; gap: 40px; flex-wrap: wrap;">
+            <div><div style="font-size: 40px; color:cyan; font-weight: bold;">50K+</div><div>Happy Customers</div></div>
+            <div><div style="font-size: 40px; color:magenta; font-weight: bold;">4.9⭐</div><div>Rating</div></div>
+            <div><div style="font-size: 40px; color:cyan; font-weight: bold;">30+</div><div>Countries</div></div>
+        </div>
+    </div>
+</section>
+
+<!-- SHOP -->
+<section id="shop" class="section">
+    <h2 style="text-align:center; font-size: 48px; margin-bottom: 10px;">🕶️ All Eyewear</h2>
+    <p style="text-align:center; color:cyan; margin-bottom: 40px;">Click any card to see details</p>
+    <div class="product-grid" id="productGrid"></div>
+</section>
+
+<!-- NEW ARRIVALS -->
+<section id="new" class="section">
+    <h2 style="text-align:center; font-size: 48px; margin-bottom: 40px;">✨ New Arrivals ✨</h2>
+    <div class="product-grid" id="newGrid"></div>
+</section>
+
+<!-- BESTSELLERS -->
+<section id="bestsellers" class="section">
+    <h2 style="text-align:center; font-size: 48px; margin-bottom: 40px;">⭐ Bestsellers ⭐</h2>
+    <div class="product-grid" id="bestsellerGrid"></div>
+</section>
+
+<!-- SIZE GUIDE -->
+<section id="sizeguide" class="section">
+    <h2 style="text-align:center; font-size: 48px;">📏 Find Your Fit</h2>
+    <div style="max-width: 500px; margin: 40px auto; background:rgba(0,255,255,0.1); border-radius: 30px; padding: 40px;">
+        <p style="font-size: 18px; text-align:center;">Enter your face width (cm)</p>
+        <input type="number" id="faceSize" placeholder="e.g., 13">
+        <button class="btn" onclick="getSizeRecommendation()" style="width:100%">🔍 Get Recommendation</button>
+        <p id="sizeResult" style="margin-top:20px; text-align:center; color:cyan; font-weight: bold;"></p>
+    </div>
+</section>
+
+<!-- ABOUT -->
+<section id="about" class="section">
+    <h2 style="text-align:center; font-size: 48px; margin-bottom: 20px;">📖 About VibeVision</h2>
+    <div style="max-width: 1000px; margin: 0 auto; text-align:center;">
+        
+        <!-- Intro -->
+        <p style="font-size: 20px; line-height: 1.6; margin-bottom: 20px;">
+            Welcome to VibeVision, a student-led startup created by five passionate learners from <strong style="color: cyan;">Class 9A</strong>. Our mission is to bring a fresh perspective to how people explore ideas, creativity, and social awareness through a modern digital platform.
+        </p>
+        <p style="font-size: 18px; line-height: 1.6; color: #ccc; margin-bottom: 50px;">
+            At VibeVision, we believe that every vision has a vibe — and every vibe deserves to be expressed. Our platform is designed to connect innovation with imagination, making learning and discovery more engaging, interactive, and meaningful. As students, we aim to show how young minds can think like entrepreneurs and contribute to building impactful solutions.
+        </p>
+
+        <!-- The Team -->
+        <h3 style="font-size: 36px; color: magenta; margin-bottom: 20px;">👥 Meet the Team</h3>
+        <div class="team-grid">
+            <div class="team-card">
+                <div style="font-size: 40px; margin-bottom: 15px;">🧠</div>
+                <h4 style="color: cyan; font-size: 20px; margin-bottom: 10px;">Nischay Jindal</h4>
+                <p style="font-size: 14px; color: #ddd; line-height: 1.5;">The driving force behind VibeVision. Nischay leads the team with creativity and strategic thinking, focusing on ideas, planning, and execution.</p>
+            </div>
+            <div class="team-card">
+                <div style="font-size: 40px; margin-bottom: 15px;">🚀</div>
+                <h4 style="color: cyan; font-size: 20px; margin-bottom: 10px;">Advik Garg</h4>
+                <p style="font-size: 14px; color: #ddd; line-height: 1.5;">Ensures smooth coordination and brings innovative ideas to life. Advik plays a key role in organizing content and managing teamwork.</p>
+            </div>
+            <div class="team-card">
+                <div style="font-size: 40px; margin-bottom: 15px;">📊</div>
+                <h4 style="color: cyan; font-size: 20px; margin-bottom: 10px;">Saksham Yadav</h4>
+                <p style="font-size: 14px; color: #ddd; line-height: 1.5;">Contributes with strong analytical thinking. Saksham helps in research and content development, ensuring accurate information.</p>
+            </div>
+            <div class="team-card">
+                <div style="font-size: 40px; margin-bottom: 15px;">🎨</div>
+                <h4 style="color: cyan; font-size: 20px; margin-bottom: 10px;">Viaan Talwar</h4>
+                <p style="font-size: 14px; color: #ddd; line-height: 1.5;">Adds creativity and design sense. Viaan focuses on presentation, layout, and making the platform visually attractive.</p>
+            </div>
+            <div class="team-card">
+                <div style="font-size: 40px; margin-bottom: 15px;">💻</div>
+                <h4 style="color: cyan; font-size: 20px; margin-bottom: 10px;">Krishiv Choudhary</h4>
+                <p style="font-size: 14px; color: #ddd; line-height: 1.5;">Supports technical aspects and structures the website. Krishiv ensures everything works efficiently and smoothly.</p>
+            </div>
+        </div>
+
+        <!-- Vision & Mission -->
+        <div style="display: flex; flex-wrap: wrap; gap: 30px; margin-bottom: 50px;">
+            <div style="flex: 1; min-width: 300px; background: rgba(0,255,255,0.1); padding: 30px; border-radius: 20px; border: 1px solid cyan; display: flex; flex-direction: column; justify-content: center;">
+                <h3 style="font-size: 28px; margin-bottom: 15px;">🌟 Our Vision</h3>
+                <p style="font-size: 16px; line-height: 1.6;">To create a platform where young ideas turn into powerful innovations, inspiring others to think differently and act creatively.</p>
+            </div>
+            <div style="flex: 1; min-width: 300px; background: rgba(255,0,255,0.1); padding: 30px; border-radius: 20px; border: 1px solid magenta; text-align: left;">
+                <h3 style="font-size: 28px; margin-bottom: 15px; text-align: center;">🚀 Our Mission</h3>
+                <ul style="margin-left: 20px; font-size: 16px; line-height: 1.8;">
+                    <li>To make learning interactive and enjoyable.</li>
+                    <li>To present ideas in a modern and engaging way.</li>
+                    <li>To encourage creativity and teamwork among students.</li>
+                    <li>To build solutions that reflect real-world thinking.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Why VibeVision -->
+        <div style="background: linear-gradient(135deg, rgba(0,255,255,0.2), rgba(255,0,255,0.2)); padding: 40px 20px; border-radius: 30px;">
+            <h3 style="font-size: 32px; margin-bottom: 15px;">💡 Why VibeVision?</h3>
+            <p style="font-size: 24px; font-weight: bold; color: white;">Because we are not just students —<br><span style="color: cyan;">we are future innovators, creators, and leaders.</span></p>
+        </div>
+
+    </div>
+</section>
+
+<!-- CONTACT -->
+<section id="contact" class="section">
+    <h2 style="text-align:center; font-size: 48px;">📞 Contact Us</h2>
+    <div style="max-width: 500px; margin: 40px auto; background:rgba(255,255,255,0.05); border-radius:30px; padding:40px;">
+        <input type="text" id="contactName" placeholder="Your name">
+        <input type="email" id="contactEmail" placeholder="Your email">
+        <textarea id="contactMsg" rows="4" placeholder="Your message"></textarea>
+        <button class="btn" onclick="sendMessage()" style="width:100%; margin-top: 10px;">📧 Send Message</button>
+    </div>
+</section>
+
+<script>
+    // PRODUCTS DATA
+    const products = [
+        { id: 1, name: "Vibe Aero", price: 2999, category: "Lightweight", image: "👓", isNew: true, isBestseller: true, specs: "TR-90 · 18g · UV400 · Anti-glare" },
+        { id: 2, name: "Vibe Luxe", price: 4499, category: "Premium", image: "🕶️", isNew: false, isBestseller: true, specs: "Titanium · Blue cut · 22g" },
+        { id: 3, name: "Vibe Sport", price: 3499, category: "Active", image: "🏃", isNew: true, isBestseller: false, specs: "Impact resistant · 24g · Rubber grips" },
+        { id: 4, name: "Vibe Classic", price: 2499, category: "Everyday", image: "👓", isNew: false, isBestseller: true, specs: "Stainless steel · Scratch resistant" },
+        { id: 5, name: "Vibe Pro", price: 6999, category: "Professional", image: "⚡", isNew: true, isBestseller: true, specs: "Carbon fiber · Photochromatic · 16g" },
+        { id: 6, name: "Vibe Neon", price: 3999, category: "Trendy", image: "🌈", isNew: true, isBestseller: false, specs: "Fluorescent · Polarized · UV400" },
+        { id: 7, name: "Vibe Round", price: 3299, category: "Vintage", image: "🌀", isNew: false, isBestseller: false, specs: "Metal core · Retro style" },
+        { id: 8, name: "Vibe Shield", price: 5299, category: "Protection", image: "🛡️", isNew: false, isBestseller: true, specs: "Wraparound · Impact rated" },
+        { id: 9, name: "Vibe Crystal", price: 3799, category: "Clear", image: "💎", isNew: true, isBestseller: false, specs: "Transparent · Minimalist" }
+    ];
+
+    let cart = [];
+
+    // UI Utilities
+    function showToast(message) {
+        const container = document.getElementById('toastContainer');
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerText = message;
+        container.appendChild(toast);
+        setTimeout(() => {
+            toast.style.opacity = '0';
+            setTimeout(() => toast.remove(), 300);
+        }, 3000);
+    }
+
+    function handleKeyPress(e, sectionId) {
+        if (e.key === 'Enter') showSection(sectionId);
+    }
+
+    // Modal Logic
+    function showDetails(id) {
+        const p = products.find(x => x.id === id);
+        document.getElementById('modalImage').innerText = p.image;
+        document.getElementById('modalTitle').innerText = p.name;
+        document.getElementById('modalPrice').innerText = `₹${p.price.toLocaleString('en-IN')}`;
+        document.getElementById('modalSpecs').innerText = p.specs;
+        
+        const addBtn = document.getElementById('modalAddBtn');
+        addBtn.onclick = () => {
+            addToCart(p.id);
+            closeModal(null, true);
+        };
+        
+        document.getElementById('productModal').classList.add('active');
+    }
+
+    function closeModal(event, force = false) {
+        if (force || event.target.id === 'productModal') {
+            document.getElementById('productModal').classList.remove('active');
+        }
+    }
+
+    // Grid Rendering
+    function renderGrid(containerId, filterFunc) {
+        const container = document.getElementById(containerId);
+        if (!container) return;
+        const filtered = products.filter(filterFunc);
+        container.innerHTML = filtered.map(p => `
+            <div class="product-card" tabindex="0" onclick="showDetails(${p.id})" onkeypress="if(event.key==='Enter') showDetails(${p.id})">
+                <div class="product-image">${p.image}</div>
+                <h3 style="margin:15px 0 5px;">${p.name}</h3>
+                <div style="color:cyan;">${p.category}</div>
+                <div style="font-size:24px; font-weight:800; margin:10px 0;">₹${p.price.toLocaleString('en-IN')}</div>
+                <div style="font-size:12px; color:#aaa; margin-bottom: 15px;">${p.specs}</div>
+                <button class="btn" style="width:100%;" onclick="event.stopPropagation(); addToCart(${p.id})">🛒 Add to Cart</button>
+            </div>
+        `).join("");
+    }
+
+    // Cart Logic
+    function addToCart(id) {
+        const product = products.find(p => p.id === id);
+        const existing = cart.find(i => i.id === id);
+        if (existing) {
+            existing.qty++;
+        } else {
+            cart.push({ ...product, qty: 1 });
+        }
+        updateCart();
+        showConfetti();
+        showToast(`${product.name} added to cart!`);
+    }
+
+    function updateCart() {
+        const cartDiv = document.getElementById("cartItems");
+        const countSpan = document.getElementById("cartCount");
+        const totalSpan = document.getElementById("cartTotal");
+        let total = 0, count = 0;
+        
+        cartDiv.innerHTML = cart.map(item => {
+            total += item.price * item.qty;
+            count += item.qty;
+            return `<div style="display:flex; justify-content:space-between; align-items: center; padding:15px 0; border-bottom:1px solid rgba(0,255,255,0.2);">
+                        <div>
+                            <strong style="font-size: 16px;">${item.name}</strong><br>
+                            <span style="color: cyan;">₹${item.price.toLocaleString('en-IN')} x ${item.qty}</span>
+                        </div>
+                        <button onclick="removeFromCart(${item.id})" style="background:rgba(255,0,0,0.2); border:1px solid red; padding:5px 12px; border-radius:20px; color:white; cursor:pointer; transition: 0.3s;">✖</button>
+                    </div>`;
+        }).join("");
+        
+        if (cart.length === 0) cartDiv.innerHTML = "<p style='color: #888; text-align: center; margin: 20px 0;'>Cart is empty</p>";
+        
+        countSpan.innerText = count;
+        totalSpan.innerText = total.toLocaleString('en-IN');
+    }
+
+    function removeFromCart(id) {
+        cart = cart.filter(i => i.id !== id);
+        updateCart();
+    }
+
+    function toggleCart() {
+        document.getElementById("cartPanel").classList.toggle("open");
+    }
+
+    function showConfetti() {
+        for (let i = 0; i < 30; i++) {
+            const conf = document.createElement("div");
+            conf.innerHTML = ["🎉","✨","🎊","👓","⚡"][Math.floor(Math.random()*5)];
+            conf.style.position = "fixed";
+            conf.style.left = Math.random() * 100 + "%";
+            conf.style.top = "-30px";
+            conf.style.fontSize = (15 + Math.random() * 20) + "px";
+            conf.style.animation = `confettiFall ${1 + Math.random() * 2}s linear forwards`;
+            conf.style.pointerEvents = "none";
+            conf.style.zIndex = "9999";
+            document.body.appendChild(conf);
+            setTimeout(() => conf.remove(), 2000);
+        }
+    }
+
+    // Business Logic Functions
+    function getSizeRecommendation() {
+        const val = document.getElementById("faceSize").value;
+        const result = document.getElementById("sizeResult");
+        if (!val) result.innerHTML = "Please enter your face width!";
+        else if (val < 12) result.innerHTML = " Narrow fit: Vibe Aero, Vibe Classic";
+        else if (val < 14) result.innerHTML = "Medium fit: Vibe Luxe, Vibe Round";
+        else result.innerHTML = "Wide fit: Vibe Sport, Vibe Shield";
+    }
+
+    function sendMessage() {
+        const nameInput = document.getElementById("contactName");
+        const emailInput = document.getElementById("contactEmail");
+        const msgInput = document.getElementById("contactMsg");
+        
+        if (!nameInput.value || !emailInput.value || !msgInput.value) {
+            showToast("Please fill in all fields.");
+            return;
+        }
+        
+        showToast(`Thanks ${nameInput.value}! We'll reply soon.`);
+        
+        // Reset form
+        nameInput.value = "";
+        emailInput.value = "";
+        msgInput.value = "";
+    }
+
+    function checkout() {
+        if (cart.length === 0) {
+            showToast("Your cart is empty!");
+            return;
+        }
+        
+        const total = document.getElementById("cartTotal").innerText;
+        showToast(`Order placed! Total: ₹${total}`);
+        
+        // Clear cart and close panel
+        cart = [];
+        updateCart();
+        toggleCart();
+        showConfetti();
+    }
+
+    function showSection(sectionId) {
+        document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+        document.getElementById(sectionId).classList.add("active");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    // Initialize all grids
+    renderGrid("productGrid", () => true);
+    renderGrid("newGrid", p => p.isNew);
+    renderGrid("bestsellerGrid", p => p.isBestseller);
+</script>
+</body>
+</html>
